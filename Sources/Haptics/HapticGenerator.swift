@@ -1,53 +1,66 @@
 import SwiftUI
 
 public class HapticGenerator {
-    static public var `default` =  HapticGenerator()
+    static public var `default` = HapticGenerator()
     
     #if os(watchOS)
     internal let device = WKInterfaceDevice.current()
     #endif
-}
     
-#if os(iOS)
-public extension HapticGenerator {
+    @AppStorage("haptics") var hapticEnabled = true
+    
+    #if os(iOS)
+    public func shouldTriggerHaptic() -> Bool {
+        return hapticEnabled // Check hapticEnabled state here
+    }
+    
     /// Triggers a selection feedback programmatically.
     ///
     /// You can also use ``.haptics(onChangeOf:)`` on your `View`.
     func hapticFeedbackOccurred() {
-        let generator = UISelectionFeedbackGenerator()
-        generator.prepare()
-        generator.selectionChanged()
+        if shouldTriggerHaptic() {
+            let generator = UISelectionFeedbackGenerator()
+            generator.prepare()
+            generator.selectionChanged()
+        }
     }
     
     /// Triggers a notification feedback programmatically.
     ///
     /// You can also use ``.haptics(onChangeOf:type:)`` on your `View`.
     func hapticFeedbackOccurred(type: UINotificationFeedbackGenerator.FeedbackType) {
-        let generator = UINotificationFeedbackGenerator()
-        generator.prepare()
-        generator.notificationOccurred(type)
+        if shouldTriggerHaptic() {
+            let generator = UINotificationFeedbackGenerator()
+            generator.prepare()
+            generator.notificationOccurred(type)
+        }
     }
     
     /// Triggers an impact feedback programmatically.
     ///
     /// You can also use ``.haptics(onChangeOf:type:)`` on your `View`.
     func hapticFeedbackOccurred(type: UIImpactFeedbackGenerator.FeedbackStyle) {
-        let generator = UIImpactFeedbackGenerator(style: type)
-        generator.prepare()
-        generator.impactOccurred()
+        if shouldTriggerHaptic() {
+            let generator = UIImpactFeedbackGenerator(style: type)
+            generator.prepare()
+            generator.impactOccurred()
+        }
     }
-}
-#elseif os(watchOS)
-public extension HapticGenerator {
+    #elseif os(watchOS)
+    public func shouldTriggerHaptic() -> Bool {
+        return hapticEnabled // Check hapticEnabled state here
+    }
+    
     /// Triggers a haptic feedback programmatically.
     ///
     /// If you want to perform different kinds of feedbacks accordingly, this function might be useful.
     ///
     /// You can also use ``.haptics(onChangeOf:type:)`` on your `View`.
     func hapticFeedbackOccurred(type: WKHapticType) {
-        device.play(type)
+        if shouldTriggerHaptic() {
+            device.play(type)
+        }
     }
+    #endif
 }
-#endif
-
 let generator = HapticGenerator.default
